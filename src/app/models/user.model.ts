@@ -1,7 +1,6 @@
 import { model, Schema } from "mongoose";
 import { IUser } from "../interfaces/user.interface";
 
-
 const userSchema = new Schema<IUser>({
     firstName: {
         type: String,
@@ -13,9 +12,17 @@ const userSchema = new Schema<IUser>({
         required: true,
         trim: true
     },
+    age: {
+        type: Number,
+        required: true,
+        min: 18,
+        max: 60,
+    },
     email: {
         type: String,
+        unique: true,
         required: true,
+        lowercase: true,
         trim: true
     },
     password: {
@@ -24,8 +31,9 @@ const userSchema = new Schema<IUser>({
     },
     role: {
         type: String,
-        enum: ['user', 'admin'],
-        default: 'user'
+        uppercase: true,
+        enum: ['USER', 'ADMIN', 'SUPER_ADMIN'],
+        default: 'USER'
     }
 })
 
