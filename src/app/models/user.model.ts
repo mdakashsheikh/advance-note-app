@@ -1,7 +1,16 @@
-import { model, Schema } from "mongoose";
-import { IUser } from "../interfaces/user.interface";
+import bcrypt from 'bcryptjs';
+import { Model, model, Schema } from "mongoose";
+import { IAddress, IUser, UserInstanceMethods } from "../interfaces/user.interface";
 
-const userSchema = new Schema<IUser>({
+const addressSchema = new Schema<IAddress>({
+    city: { type: String },
+    street: { type: String },
+    zip: { type: Number }
+}, {
+    _id: false
+})
+
+const userSchema = new Schema<IUser, Model<IUser>, UserInstanceMethods>({
     firstName: {
         type: String,
         required: true,
@@ -23,7 +32,15 @@ const userSchema = new Schema<IUser>({
         unique: true,
         required: true,
         lowercase: true,
-        trim: true
+        trim: true,
+        validate: {
+            validator: function(v) {
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)
+            },
+            message: function(props) {
+                return `Email ${props.value} is not valid email!`
+            }
+        }
     },
     password: {
         type: String,
@@ -34,7 +51,20 @@ const userSchema = new Schema<IUser>({
         uppercase: true,
         enum: ['USER', 'ADMIN', 'SUPER_ADMIN'],
         default: 'USER'
+    },
+    address: {
+        type: addressSchema
     }
+}, {
+    versionKey: false,
+    timestamps: true
+})
+
+userSchema.method("hashPassword", async function hashPassword(plainPassword: string) {
+    const salt = await bcrypt.genSalt(10)
+    const password = await bcrypt.hash(plainPassword, salt)
+    this.password = password
+    // return password;
 })
 
 export const User = model('User', userSchema)

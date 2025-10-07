@@ -32,7 +32,7 @@ noteRouter.post('/create-note', async(req: Request, res: Response) => {
 
 noteRouter.get('/', async(req: Request, res: Response) => {
 
-    const notes = await Note.find()
+    const notes = await Note.find().populate('user')
 
     res.status(200).json({
         success: true,
