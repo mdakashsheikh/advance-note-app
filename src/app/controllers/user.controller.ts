@@ -22,12 +22,12 @@ userRoutes.post('/create-user', async(req: Request, res: Response) => {
 
         // console.log( body, 'Zod body')
 
-        // const user = await User.create(body);
-        const user = new User(body);
+        const user = await User.create(body);
+        // const user = new User(body);
 
-        user.hashPassword(body.password)
+        // user.hashPassword(body.password)
 
-        await user.save()
+        // await user.save()
     
         res.status(201).json({
             success: true,
@@ -47,8 +47,17 @@ userRoutes.post('/create-user', async(req: Request, res: Response) => {
 })
 
 userRoutes.get('/', async(req: Request, res: Response) => {
-    
-    const users = await User.find();
+
+    const userEmail = req.query.email;
+
+    // let users = [];
+    // if(userEmail) {
+    //     users = await User.find({ email: userEmail });
+    // } else {
+    //     users = await User.find();
+    // }
+
+    const users = await User.find().sort({ email: 'ascending' })
 
     res.status(200).json({
         success: true,
@@ -80,7 +89,7 @@ userRoutes.patch('/:userId', async(req: Request, res: Response) => {
 
     res.status(200).json({
         success: true,
-        message: 'User Updated Successfully',
+        message: 'User Updated Successfully', 
         updatedUser
     })
 })
@@ -89,8 +98,9 @@ userRoutes.delete('/:userId', async(req: Request, res: Response) => {
 
     const userId = req.params.userId;
 
-    await User.findByIdAndDelete(userId);
+    // await User.findByIdAndDelete(userId);
 
+    await User.findOneAndDelete({ _id: userId })
     res.status(200).json({
         success: true,
         message: 'User Deleted Successfully'
